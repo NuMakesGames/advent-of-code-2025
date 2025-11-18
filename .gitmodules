@@ -1,0 +1,3 @@
+[submodule "ext/nu-engine"]
+	path = ext/nu-engine
+	url = git@github.com:NuMakesGames/nu-engine.git
