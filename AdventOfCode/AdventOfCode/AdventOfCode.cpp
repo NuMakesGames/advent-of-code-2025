@@ -270,5 +270,6 @@ int main(int argc, char* argv[])
 		std::cout << color::ForegroundBrightWhite << ".\n";
 	}
 
+
 	nu::console::RestoreConsoleState(consoleState, false /*shouldRestorePosition*/);
 }
