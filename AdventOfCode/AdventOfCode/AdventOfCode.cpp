@@ -6,89 +6,104 @@
 #include "../Utilities/Utilities.h"
 #include "PuzzleSolvers.h"
 
+#define NOMINMAX
+#include <Windows.h>
+
 using namespace std::chrono_literals;
 using namespace Utilities;
 using namespace nu::console;
 using namespace nu::console::vt;
 
-const std::unordered_set<std::string> validArgs = { "--sampleInput", "--fullInput", "--render",   "--partA",    "--partB",    "--puzzle01",
-	                                                "--puzzle02",    "--puzzle03",  "--puzzle04", "--puzzle05", "--puzzle06", "--puzzle07",
-	                                                "--puzzle08",    "--puzzle09",  "--puzzle10", "--puzzle11", "--puzzle12" };
+const std::unordered_set<std::string> validArgs = { "--sampleInput", "--fullInput", "--visualize", "--partA",    "--partB",    "--puzzle01",
+	                                                "--puzzle02",    "--puzzle03",  "--puzzle04",  "--puzzle05", "--puzzle06", "--puzzle07",
+	                                                "--puzzle08",    "--puzzle09",  "--puzzle10",  "--puzzle11", "--puzzle12" };
 
-const std::vector<std::function<void(const std::filesystem::path&, bool)>> partASolvers = {
-	Puzzle01A::PrintSolution, Puzzle02A::PrintSolution, Puzzle03A::PrintSolution, Puzzle04A::PrintSolution,
-	Puzzle05A::PrintSolution, Puzzle06A::PrintSolution, Puzzle07A::PrintSolution, Puzzle08A::PrintSolution,
-	Puzzle09A::PrintSolution, Puzzle10A::PrintSolution, Puzzle11A::PrintSolution, Puzzle12A::PrintSolution
+struct SolverFunctions
+{
+	std::function<std::string(const std::vector<std::string>&)> solvePartA;
+	std::function<std::string(const std::vector<std::string>&)> solvePartB;
+	std::function<std::string(const std::vector<std::string>&)> visualizePartA;
+	std::function<std::string(const std::vector<std::string>&)> visualizePartB;
 };
 
-const std::vector<std::function<void(const std::filesystem::path&, bool)>> partBSolvers = {
-	Puzzle01B::PrintSolution, Puzzle02B::PrintSolution, Puzzle03B::PrintSolution, Puzzle04B::PrintSolution,
-	Puzzle05B::PrintSolution, Puzzle06B::PrintSolution, Puzzle07B::PrintSolution, Puzzle08B::PrintSolution,
-	Puzzle09B::PrintSolution, Puzzle10B::PrintSolution, Puzzle11B::PrintSolution, Puzzle12B::PrintSolution
+const std::array<SolverFunctions, 12> solvers = {
+	SolverFunctions{ Puzzle01A::Solve, Puzzle01B::Solve, Puzzle01A::Visualize, Puzzle01B::Visualize },
+	SolverFunctions{ Puzzle02A::Solve, Puzzle02B::Solve, Puzzle02A::Visualize, Puzzle02B::Visualize },
+	SolverFunctions{ Puzzle03A::Solve, Puzzle03B::Solve, Puzzle03A::Visualize, Puzzle03B::Visualize },
+	SolverFunctions{ Puzzle04A::Solve, Puzzle04B::Solve, Puzzle04A::Visualize, Puzzle04B::Visualize },
+	SolverFunctions{ Puzzle05A::Solve, Puzzle05B::Solve, Puzzle05A::Visualize, Puzzle05B::Visualize },
+	SolverFunctions{ Puzzle06A::Solve, Puzzle06B::Solve, Puzzle06A::Visualize, Puzzle06B::Visualize },
+	SolverFunctions{ Puzzle07A::Solve, Puzzle07B::Solve, Puzzle07A::Visualize, Puzzle07B::Visualize },
+	SolverFunctions{ Puzzle08A::Solve, Puzzle08B::Solve, Puzzle08A::Visualize, Puzzle08B::Visualize },
+	SolverFunctions{ Puzzle09A::Solve, Puzzle09B::Solve, Puzzle09A::Visualize, Puzzle09B::Visualize },
+	SolverFunctions{ Puzzle10A::Solve, Puzzle10B::Solve, Puzzle10A::Visualize, Puzzle10B::Visualize },
+	SolverFunctions{ Puzzle11A::Solve, Puzzle11B::Solve, Puzzle11A::Visualize, Puzzle11B::Visualize },
+	SolverFunctions{ Puzzle12A::Solve, Puzzle12B::Solve, Puzzle12A::Visualize, Puzzle12B::Visualize }
 };
 
-const std::vector<std::vector<std::filesystem::path>> puzzleInputPaths = {
-	{ "Puzzle01.input" }, { "Puzzle02.input" }, { "Puzzle03.input" }, { "Puzzle04.input" }, { "Puzzle05.input" },
-	{ "Puzzle06.input" }, { "Puzzle07.input" }, { "Puzzle08.input" }, { "Puzzle09.input" }, { "Puzzle10.input" },
-	{ "Puzzle11.input" }, { "Puzzle12.input" }, { "Puzzle13.input" }, { "Puzzle14.input" }, { "Puzzle15.input" },
-	{ "Puzzle16.input" }, { "Puzzle17.input" }, { "Puzzle18.input" }, { "Puzzle19.input" }, { "Puzzle20.input" },
-	{ "Puzzle21.input" }, { "Puzzle22.input" }, { "Puzzle23.input" }, { "Puzzle24.input" }, { "Puzzle25.input" },
+const std::array<std::vector<std::filesystem::path>, 12> puzzleInputPaths = {
+	std::vector<std::filesystem::path>{ "Puzzle01.input" }, std::vector<std::filesystem::path>{ "Puzzle02.input" },
+	std::vector<std::filesystem::path>{ "Puzzle03.input" }, std::vector<std::filesystem::path>{ "Puzzle04.input" },
+	std::vector<std::filesystem::path>{ "Puzzle05.input" }, std::vector<std::filesystem::path>{ "Puzzle06.input" },
+	std::vector<std::filesystem::path>{ "Puzzle07.input" }, std::vector<std::filesystem::path>{ "Puzzle08.input" },
+	std::vector<std::filesystem::path>{ "Puzzle09.input" }, std::vector<std::filesystem::path>{ "Puzzle10.input" },
+	std::vector<std::filesystem::path>{ "Puzzle11.input" }, std::vector<std::filesystem::path>{ "Puzzle12.input" }
 };
 
-const std::vector<std::vector<std::vector<std::filesystem::path>>> puzzleSamplePaths = { {
-																							 { "Puzzle01SampleA.input" },
-																							 { "Puzzle01SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle02SampleA.input" },
-																							 { "Puzzle02SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle03SampleA.input" },
-																							 { "Puzzle03SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle04SampleA.input" },
-																							 { "Puzzle04SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle05SampleA.input" },
-																							 { "Puzzle05SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle06SampleA.input" },
-																							 { "Puzzle06SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle07SampleA.input" },
-																							 { "Puzzle07SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle08SampleA.input" },
-																							 { "Puzzle08SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle09SampleA.input" },
-																							 { "Puzzle09SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle10SampleA.input" },
-																							 { "Puzzle10SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle11SampleA.input" },
-																							 { "Puzzle11SampleA.input" },
-																						 },
-	                                                                                     {
-																							 { "Puzzle12SampleA.input" },
-																							 { "Puzzle12SampleA.input" },
-																						 } };
+const std::array<std::vector<std::vector<std::filesystem::path>>, 12> puzzleSamplePaths = { std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle01SampleA.input" },
+																								{ "Puzzle01SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle02SampleA.input" },
+																								{ "Puzzle02SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle03SampleA.input" },
+																								{ "Puzzle03SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle04SampleA.input" },
+																								{ "Puzzle04SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle05SampleA.input" },
+																								{ "Puzzle05SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle06SampleA.input" },
+																								{ "Puzzle06SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle07SampleA.input" },
+																								{ "Puzzle07SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle08SampleA.input" },
+																								{ "Puzzle08SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle09SampleA.input" },
+																								{ "Puzzle09SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle10SampleA.input" },
+																								{ "Puzzle10SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle11SampleA.input" },
+																								{ "Puzzle11SampleA.input" },
+																							},
+	                                                                                        std::vector<std::vector<std::filesystem::path>>{
+																								{ "Puzzle12SampleA.input" },
+																								{ "Puzzle12SampleA.input" },
+																							} };
 
 struct Args
 {
 	bool useSampleInput = false;
 	bool useFullInput = false;
-	bool shouldRender = false;
+	bool shouldVisualize = false;
 	bool runPartA = false;
 	bool runPartB = false;
 	std::vector<int> puzzlesToRun;
@@ -131,9 +146,9 @@ Args ReadArgs(int argc, char* argv[])
 				{
 					result.useFullInput = true;
 				}
-				else if (arg == "--render")
+				else if (arg == "--visualize")
 				{
-					result.shouldRender = true;
+					result.shouldVisualize = true;
 				}
 				else if (arg == "--partA")
 				{
@@ -177,6 +192,7 @@ int main(int argc, char* argv[])
 {
 	auto consoleState = CacheConsoleState();
 	nu::console::EnableVirtualTerminalProcessing();
+	::timeBeginPeriod(1); // Request 1 ms timer resolution for more accurate measurements (Windows default is 15.6 ms).
 
 	Args args = ReadArgs(argc, argv);
 	if (args.puzzlesToRun.empty())
@@ -186,7 +202,7 @@ int main(int argc, char* argv[])
 		std::cout << color::ForegroundBrightWhite << "  AdventOfCode.exe ";
 		std::cout << color::ForegroundBrightGreen << "--puzzle04\n";
 		std::cout << color::ForegroundBrightWhite << "  AdventOfCode.exe ";
-		std::cout << color::ForegroundBrightGreen << "--render --puzzle01 --puzzle02\n";
+		std::cout << color::ForegroundBrightGreen << "--visualize --puzzle01 --puzzle02\n";
 		std::cout << color::ForegroundBrightWhite << "  AdventOfCode.exe ";
 		std::cout << color::ForegroundBrightGreen << "--partB --fullInput --puzzle02\n";
 		std::cout << color::ForegroundBrightWhite << "  AdventOfCode.exe ";
@@ -227,7 +243,9 @@ int main(int argc, char* argv[])
 				inputPaths.append_range(puzzleInputPaths[puzzleId - 1]);
 			}
 
-			const auto solver = i == 0 ? partASolvers[puzzleId - 1] : partBSolvers[puzzleId - 1];
+			const auto& solverFunctions = solvers[puzzleId - 1];
+			const auto& solver = args.shouldVisualize ? (i == 0 ? solverFunctions.visualizePartA : solverFunctions.visualizePartB)
+			                                          : (i == 0 ? solverFunctions.solvePartA : solverFunctions.solvePartB);
 			for (const auto& inputPath : inputPaths)
 			{
 				{
@@ -239,11 +257,15 @@ int main(int argc, char* argv[])
 				// Fully qualify the path to the input files, which have been copied next to the executable.
 				static const std::filesystem::path executablePath = argv[0];
 				std::filesystem::path fullInputPath = executablePath.parent_path() / inputPath;
+				auto inputLines = ReadAllLinesInFile(fullInputPath);
 
 				auto start = std::chrono::high_resolution_clock::now();
-				solver(fullInputPath, args.shouldRender);
+				auto result = solver(inputLines);
 				auto stop = std::chrono::high_resolution_clock::now();
 				totalDurationMs += std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+				// Printing to cout is a substantial time cost on fast problems, so solvers return the solution as a string.
+				std::cout << color::ForegroundRGB(0xff, 0xff, 0x66) << result;
 
 				{
 					std::cout << color::ForegroundBrightWhite << "\nSolver executed in ";
@@ -251,11 +273,11 @@ int main(int argc, char* argv[])
 					if (durationUs > 1000us)
 					{
 						auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-						std::cout << color::ForegroundBrightYellow << durationMs.count() << "." << durationUs.count() % 1000 << " ms";
+						std::cout << color::ForegroundBrightBlue << durationMs.count() << "." << durationUs.count() % 1000 << " ms";
 					}
 					else
 					{
-						std::cout << color::ForegroundBrightYellow << durationUs.count() << " us";
+						std::cout << color::ForegroundBrightBlue << durationUs.count() << " us";
 					}
 					std::cout << color::ForegroundBrightWhite << ".\n";
 				}
@@ -266,10 +288,10 @@ int main(int argc, char* argv[])
 	if (args.puzzlesToRun.size() > 1)
 	{
 		std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
-		std::cout << color::ForegroundBrightYellow << totalDurationMs.count() << " ms";
+		std::cout << color::ForegroundBrightBlue << totalDurationMs.count() << " ms";
 		std::cout << color::ForegroundBrightWhite << ".\n";
 	}
 
-
+	::timeEndPeriod(1); // Restore default timer resolution.
 	nu::console::RestoreConsoleState(consoleState, false /*shouldRestorePosition*/);
 }

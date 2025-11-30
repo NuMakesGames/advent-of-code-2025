@@ -7,11 +7,11 @@ namespace Utilities
 	// Reads the provided text file and returns all lines as strings.
 	std::vector<std::string> ReadAllLinesInFile(const std::filesystem::path& path);
 
-	// Reads the provided text file and returns a 2d grid of characters
-	Grid2d<char> ReadAllLinesInFileAsGrid(const std::filesystem::path& path);
+	// Converts the provided lines of text to a 2d grid of characters
+	Grid2d<char> ConvertLinesToGrid(const std::vector<std::string>& lines);
 
-	// Reads the provided text file and returns a 2d grid of integers
-	Grid2d<int> ReadAllLinesInFileAsGridOfInts(const std::filesystem::path& path);
+	// Converts the provided lines of text to a 2d grid of integers
+	Grid2d<int> ConvertLinesToGridOfInts(const std::vector<std::string>& lines);
 
 	// Writes the provided lines to the specified text file, overwriting if it exists.
 	bool WriteAllLinesToFile(const std::filesystem::path& path, const std::vector<std::string>& lines);
@@ -78,11 +78,11 @@ namespace Utilities
 	// Parses the input string into tokens separated by the provided delimiter and applies the supplied
 	// transform to each token.
 	template<typename T>
-	std::vector<T> SplitStringAndTransform(
-		std::string_view input, std::string_view delimiter, std::function<T(std::string_view)> transform)
+	std::vector<T> SplitStringAndTransform(std::string_view input, std::string_view delimiter, std::function<T(std::string_view)> transform)
 	{
 		return std::views::split(input, delimiter)
-			| std::views::transform([&transform](const auto& subrange){ return transform(std::string_view{ subrange.begin(), subrange.end() }); })
-			| std::ranges::to<std::vector>();
+		     | std::views::transform([&transform](const auto& subrange)
+		                             { return transform(std::string_view{ subrange.begin(), subrange.end() }); })
+		     | std::ranges::to<std::vector>();
 	}
-}
+} // namespace Utilities

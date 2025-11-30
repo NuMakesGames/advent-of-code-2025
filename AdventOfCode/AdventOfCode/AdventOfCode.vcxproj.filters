@@ -110,10 +110,10 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PuzzleSolvers.h">
-      <Filter>Puzzles</Filter>
-    </ClInclude>
     <ClInclude Include="CodeGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PuzzleSolvers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

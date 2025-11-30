@@ -2,120 +2,144 @@
 
 namespace Puzzle01A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle01B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle02A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle02B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle03A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle03B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle04A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle04B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle05A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle05B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle06A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle06B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle07A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle07B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle08A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle08B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle09A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle09B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle10A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle10B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle11A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle11B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle12A
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }
 
 namespace Puzzle12B
 {
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);
+	std::string Solve(const std::vector<std::string>& inputLines);
+	std::string Visualize(const std::vector<std::string>& inputLines);
 }

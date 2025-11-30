@@ -22,10 +22,9 @@ namespace Utilities
 		return lines;
 	}
 
-	Grid2d<char> ReadAllLinesInFileAsGrid(const std::filesystem::path& path)
+	Grid2d<char> ConvertLinesToGrid(const std::vector<std::string>& lines)
 	{
-		auto lines = ReadAllLinesInFile(path);
-		VerifyElseCrash(lines.size() >= 1);
+		VerifyElseCrash(!lines.empty());
 
 		int width = static_cast<int>(lines[0].size());
 		int height = static_cast<int>(lines.size());
@@ -44,10 +43,9 @@ namespace Utilities
 		return grid;
 	}
 
-	Grid2d<int> ReadAllLinesInFileAsGridOfInts(const std::filesystem::path& path)
+	Grid2d<int> ConvertLinesToGridOfInts(const std::vector<std::string>& lines)
 	{
-		auto lines = ReadAllLinesInFile(path);
-		VerifyElseCrash(lines.size() >= 1);
+		VerifyElseCrash(!lines.empty());
 
 		int width = static_cast<int>(lines[0].size());
 		int height = static_cast<int>(lines.size());

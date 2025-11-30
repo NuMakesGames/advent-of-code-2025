@@ -21,7 +21,8 @@ namespace CodeGenerator
 				builder << "namespace Puzzle" << std::setfill('0') << std::setw(2) << i << suffix;
 				lines.emplace_back(builder.str());
 				lines.emplace_back("{");
-				lines.emplace_back("\tvoid PrintSolution(const std::filesystem::path& inputFile, bool shouldRender);");
+				lines.emplace_back("\tstd::string Solve(const std::vector<std::string>& inputLines);");
+				lines.emplace_back("\tstd::string Visualize(const std::vector<std::string>& inputLines);");
 				lines.emplace_back("}");
 			}
 		}
@@ -31,7 +32,7 @@ namespace CodeGenerator
 
 	void GeneratePuzzleSolvers()
 	{
-		for (auto i = 1; i <= 25; ++i)
+		for (auto i = 1; i <= 12; ++i)
 		{
 			for (auto j = 0; j < 2; ++j)
 			{
@@ -57,32 +58,31 @@ namespace CodeGenerator
 				builder << "namespace " << puzzleNameWithSuffix;
 				auto namespaceName = builder.str();
 				lines.emplace_back(namespaceName);
-
 				lines.emplace_back("{");
-				lines.emplace_back("\tauto ReadInput(const std::filesystem::path& inputFile)");
+
+				lines.emplace_back("\tstd::string Solve(const std::vector<std::string>& inputLines)");
 				lines.emplace_back("\t{");
 
 				builder.str("");
 				builder.clear();
 				builder << "\t\t"
-						<< R"(auto input = ReadAllLinesInFile(inputFile);)";
+						<< R"(return ")" << puzzleNameWithSuffix << R"( not yet solved!";)";
 				lines.emplace_back(builder.str());
-				lines.emplace_back("");
-				lines.emplace_back("\t\treturn input;");
-				lines.emplace_back("\t}");
-				lines.emplace_back("");
 
-				lines.emplace_back("\tvoid PrintSolution(const std::filesystem::path& inputFile, bool shouldRender)");
+				lines.emplace_back("\t}");
+
+				lines.emplace_back("");
+				lines.emplace_back("\tstd::string Visualize(const std::vector<std::string>& inputLines)");
 				lines.emplace_back("\t{");
-				lines.emplace_back("\t\tauto input = ReadInput(inputFile);");
 
 				builder.str("");
 				builder.clear();
-				builder << "\n\t\t"
-						<< R"(std::cout << ")" << puzzleNameWithSuffix << R"( not yet solved!";)";
+				builder << "\t\t"
+						<< R"(return Solve(inputLines);)";
 				lines.emplace_back(builder.str());
 
 				lines.emplace_back("\t}");
+
 				builder.str("");
 				builder.clear();
 				builder << "} // " << namespaceName;

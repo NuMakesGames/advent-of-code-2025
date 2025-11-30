@@ -22,10 +22,10 @@ TEST(ReadAllLinesInFileTests, HandlesBasicTextFile)
 	EXPECT_EQ(result[7], "15 18 19");
 }
 
-TEST(ReadAllLinesInFileAsGridTests, HandlesBasicTextFile)
+TEST(ConvertLinesToGridTests, HandlesBasicTextFile)
 {
 	auto lines = Utilities::ReadAllLinesInFile("ReadAllLinesInFileAsGridTests.input");
-	auto grid = Utilities::ReadAllLinesInFileAsGrid("ReadAllLinesInFileAsGridTests.input");
+	auto grid = Utilities::ConvertLinesToGrid(lines);
 
 	ASSERT_EQ(grid.Width(), 21);
 	ASSERT_EQ(grid.Height(), 19);
@@ -39,10 +39,10 @@ TEST(ReadAllLinesInFileAsGridTests, HandlesBasicTextFile)
 	}
 }
 
-TEST(ReadAllLinesInFileAsGridOfIntsTests, HandlesBasicTextFile)
+TEST(ConvertLinesToGridOfIntsTests, HandlesBasicTextFile)
 {
 	auto lines = Utilities::ReadAllLinesInFile("ReadAllLinesInFileAsGridOfIntsTests.input");
-	auto grid = Utilities::ReadAllLinesInFileAsGridOfInts("ReadAllLinesInFileAsGridOfIntsTests.input");
+	auto grid = Utilities::ConvertLinesToGridOfInts(lines);
 
 	ASSERT_EQ(grid.Width(), 13);
 	ASSERT_EQ(grid.Height(), 13);

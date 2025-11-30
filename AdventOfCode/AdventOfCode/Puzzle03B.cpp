@@ -10,17 +10,13 @@ using namespace nu::console::vt;
 
 namespace Puzzle03B
 {
-	auto ReadInput(const std::filesystem::path& inputFile)
+	std::string Solve(const std::vector<std::string>& inputLines)
 	{
-		auto input = ReadAllLinesInFile(inputFile);
-
-		return input;
+		return "Puzzle03B not yet solved!";
 	}
 
-	void PrintSolution(const std::filesystem::path& inputFile, bool shouldRender)
+	std::string Visualize(const std::vector<std::string>& inputLines)
 	{
-		auto input = ReadInput(inputFile);
-
-		std::cout << "Puzzle03B not yet solved!";
+		return Solve(inputLines);
 	}
 } // namespace Puzzle03B
