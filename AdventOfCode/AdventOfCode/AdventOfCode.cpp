@@ -1,4 +1,4 @@
-// AdventOfCode.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// AdventOfCode.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
 #include "pch.h"
@@ -188,6 +188,17 @@ Args ReadArgs(int argc, char* argv[])
 	return result;
 }
 
+struct PuzzleDetails
+{
+	int puzzleId = 0;
+	char part = 'A';
+	std::string inputFile;
+	std::chrono::microseconds durationUs = 0us;
+	std::string solution;
+};
+
+void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings);
+
 int main(int argc, char* argv[])
 {
 	auto consoleState = CacheConsoleState();
@@ -209,7 +220,7 @@ int main(int argc, char* argv[])
 		std::cout << color::ForegroundBrightGreen << "--partA --sampleInput --puzzle03\n";
 	}
 
-	auto totalDurationMs = 0ms;
+	std::vector<PuzzleDetails> puzzleTimings;
 	for (int puzzleId : args.puzzlesToRun)
 	{
 		for (auto i = 0; i < 2; ++i)
@@ -262,7 +273,13 @@ int main(int argc, char* argv[])
 				auto start = std::chrono::high_resolution_clock::now();
 				auto result = solver(inputLines);
 				auto stop = std::chrono::high_resolution_clock::now();
-				totalDurationMs += std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+				puzzleTimings.emplace_back(
+					PuzzleDetails{ puzzleId,
+				                   i == 0 ? 'A' : 'B',
+				                   inputPath.string(),
+				                   std::chrono::duration_cast<std::chrono::microseconds>(stop - start),
+				                   result });
 
 				// Printing to cout is a substantial time cost on fast problems, so solvers return the solution as a string.
 				std::cout << color::ForegroundRGB(0xff, 0xff, 0x66) << result;
@@ -285,13 +302,72 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (args.puzzlesToRun.size() > 1)
+	auto totalDurationUs = 0us;
+	for (const auto& timing : puzzleTimings)
 	{
-		std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
-		std::cout << color::ForegroundBrightBlue << totalDurationMs.count() << " ms";
-		std::cout << color::ForegroundBrightWhite << ".\n";
+		totalDurationUs += timing.durationUs;
 	}
+
+	std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
+	std::cout << color::ForegroundBrightBlue << std::chrono::duration_cast<std::chrono::milliseconds>(totalDurationUs).count() << " ms";
+	std::cout << color::ForegroundBrightWhite << ".\n";
+
+	PrintPuzzleDetailsTable(puzzleTimings);
 
 	::timeEndPeriod(1); // Restore default timer resolution.
 	nu::console::RestoreConsoleState(consoleState, false /*shouldRestorePosition*/);
+}
+
+void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
+{
+	std::cout << "\n";
+	std::cout << vt::DrawingMode << "lqqqqqwqqqqqqwqqqqqqqqqqqqqqqqqqqqqqqwqqqqqqqqqqqqqqqqqqqqqqwqqqqqqqqqqk";
+	std::cout << vt::ASCIIMode << '\n';
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Day ";
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Part ";
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite
+			  << "Input File            ";
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite
+			  << "Solution             ";
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Duration ";
+	std::cout << color::ForegroundWhite << vt::DrawingMode << "x" << vt::ASCIIMode << '\n';
+	std::cout << vt::DrawingMode << "tqqqqqnqqqqqqnqqqqqqqqqqqqqqqqqqqqqqqnqqqqqqqqqqqqqqqqqqqqqqnqqqqqqqqqqu";
+	std::cout << vt::ASCIIMode << '\n';
+	for (const auto& timing : puzzleTimings)
+	{
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightCyan
+				  << std::format("{:>2}  ", timing.puzzleId);
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode
+				  << (timing.part == 'A' ? color::ForegroundBrightGreen : color::ForegroundBrightRed) << " " << timing.part << "   ";
+
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightBlue
+				  << std::format("{:<21} ", timing.inputFile);
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << (timing.solution.size() <= 20
+			? color::ForegroundRGB(0xff, 0xff, 0x66)
+			: color::ForegroundBrightMagenta) << std::format("{:<20} ", timing.solution.size() <= 20 ? timing.solution : "FULL OUTPUT ABOVE");
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode;
+		auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(timing.durationUs);
+		if (timing.durationUs < 1000us)
+		{
+			std::cout << color::ForegroundBrightGreen << std::format("{:<9}", std::format("{} us", timing.durationUs.count()));
+		}
+		else if (durationMs < 10ms)
+		{
+			std::cout << color::ForegroundBrightYellow
+					  << std::format("{:<9}", std::format("{}.{} ms", durationMs.count(), timing.durationUs.count() % 1000 / 10));
+		}
+		else if (durationMs < 1000ms)
+		{
+			std::cout << color::ForegroundBrightYellow << std::format("{:<9}", std::format("{} ms", durationMs.count()));
+		}
+		else
+		{
+			auto durationSec = std::chrono::duration_cast<std::chrono::seconds>(timing.durationUs);
+			std::cout << color::ForegroundBrightRed
+					  << std::format("{:<9}", std::format("{}.{} s", durationSec.count(), durationMs.count() % 1000 / 10));
+		}
+		std::cout << color::ForegroundWhite << vt::DrawingMode << "x" << vt::ASCIIMode << '\n';
+	}
+	std::cout << vt::DrawingMode << "mqqqqqvqqqqqqvqqqqqqqqqqqqqqqqqqqqqqqvqqqqqqqqqqqqqqqqqqqqqqvqqqqqqqqqqj";
+	std::cout << vt::ASCIIMode << '\n';
 }
