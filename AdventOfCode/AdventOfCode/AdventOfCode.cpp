@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						std::cout << color::ForegroundBrightBlue << durationUs.count() << " us";
+						std::cout << color::ForegroundBrightBlue << durationUs.count() << " µs";
 					}
 					std::cout << color::ForegroundBrightWhite << ".\n";
 				}
@@ -349,7 +349,7 @@ void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 		auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(timing.durationUs);
 		if (timing.durationUs < 1000us)
 		{
-			std::cout << color::ForegroundBrightGreen << std::format("{:<9}", std::format("{} us", timing.durationUs.count()));
+			std::cout << color::ForegroundBrightGreen << std::format("{:<9}", std::format("{} µs", timing.durationUs.count()));
 		}
 		else if (durationMs < 10ms)
 		{
