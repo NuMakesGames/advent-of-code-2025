@@ -323,53 +323,111 @@ int main(int argc, char* argv[])
 
 void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 {
-	std::cout << "\n";
-	std::cout << vt::DrawingMode << "lqqqqqwqqqqqqwqqqqqqqqqqqqqqqqqqqqqqqwqqqqqqqqqqqqqqqqqqqqqqwqqqqqqqqqqk";
-	std::cout << vt::ASCIIMode << '\n';
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Day ";
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Part ";
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite
-			  << "Input File            ";
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite
-			  << "Solution             ";
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightWhite << "Duration ";
-	std::cout << color::ForegroundWhite << vt::DrawingMode << "x" << vt::ASCIIMode << '\n';
-	std::cout << vt::DrawingMode << "tqqqqqnqqqqqqnqqqqqqqqqqqqqqqqqqqqqqqnqqqqqqqqqqqqqqqqqqqqqqnqqqqqqqqqqu";
+	constexpr auto columns = 5;
+	constexpr std::string_view labelDay = "Day";
+	constexpr std::string_view labelPart = "Part";
+	constexpr std::string_view labelInputFile = "Input File";
+	constexpr std::string_view labelSolution = "Solution";
+	constexpr std::string_view labelDuration = "Duration";
+
+	auto longestInputFileLength = labelInputFile.size();
+	for (const auto& puzzleTiming : puzzleTimings)
+	{
+		longestInputFileLength = std::max(longestInputFileLength, puzzleTiming.inputFile.size());
+	}
+
+	constexpr std::string_view maxSolutionIndicator = "FULL OUTPUT ABOVE";
+	constexpr auto maxSolutionLength = 20;
+	auto longestSolutionLength = maxSolutionIndicator.size();
+	for (const auto& puzzleTiming : puzzleTimings)
+	{
+		if (puzzleTiming.solution.size() <= maxSolutionLength)
+		{
+			longestSolutionLength = std::max(longestSolutionLength, puzzleTiming.solution.size());
+		}
+	}
+
+	constexpr auto colorHeader = color::ForegroundBrightWhite;
+	constexpr auto colorBorder = color::ForegroundCyan;
+	constexpr auto colorDay = color::ForegroundBrightCyan;
+	constexpr auto colorPartA = color::ForegroundBrightGreen;
+	constexpr auto colorPartB = color::ForegroundBrightRed;
+	constexpr auto colorInputFile = color::ForegroundBrightBlue;
+	const auto colorSolution = color::ForegroundRGB(0xff, 0xff, 0x66);
+	constexpr auto colorSolutionTooLong = color::ForegroundBrightMagenta;
+	constexpr auto colorDurationFast = color::ForegroundBrightGreen;
+	constexpr auto colorDurationMedium = color::ForegroundBrightYellow;
+	constexpr auto colorDurationSlow = color::ForegroundBrightRed;
+
+	// Print top line of the table
+	std::cout << "\n" << colorBorder;
+	std::cout << vt::DrawingMode << "l" << std::string(labelDay.size() + 2, 'q') << "w" << std::string(labelPart.size() + 2, 'q') << "w"
+			  << std::string(longestInputFileLength + 2, 'q') << "w" << std::string(longestSolutionLength + 2, 'q') << "w"
+			  << std::string(labelDuration.size() + 2, 'q') << "k";
+
+	// Print header row
+	std::cout << vt::ASCIIMode << '\n'
+			  << colorBorder << vt::DrawingMode << "x " << vt::ASCIIMode << colorHeader << labelDay << colorBorder << vt::DrawingMode
+			  << " x " << vt::ASCIIMode << colorHeader << labelPart << colorBorder << vt::DrawingMode << " x " << vt::ASCIIMode
+			  << colorHeader << std::vformat("{:<" + std::to_string(longestInputFileLength) + "}", std::make_format_args(labelInputFile))
+			  << colorBorder << vt::DrawingMode << " x " << vt::ASCIIMode << colorHeader
+			  << std::vformat("{:<" + std::to_string(longestSolutionLength) + "}", std::make_format_args(labelSolution)) << colorBorder
+			  << vt::DrawingMode << " x " << vt::ASCIIMode << colorHeader << labelDuration << colorBorder << vt::DrawingMode << " x"
+			  << vt::ASCIIMode << '\n';
+
+	// Print separator line
+	std::cout << vt::DrawingMode << "t" << std::string(labelDay.size() + 2, 'q') << "n" << std::string(labelPart.size() + 2, 'q') << "n"
+			  << std::string(longestInputFileLength + 2, 'q') << "n" << std::string(longestSolutionLength + 2, 'q') << "n"
+			  << std::string(labelDuration.size() + 2, 'q') << "u";
+
+	// Print data rows
 	std::cout << vt::ASCIIMode << '\n';
 	for (const auto& timing : puzzleTimings)
 	{
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightCyan
-				  << std::format("{:>2}  ", timing.puzzleId);
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode
-				  << (timing.part == 'A' ? color::ForegroundBrightGreen : color::ForegroundBrightRed) << " " << timing.part << "   ";
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightBlue
-				  << std::format("{:<21} ", timing.inputFile);
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << (timing.solution.size() <= 20
-			? color::ForegroundRGB(0xff, 0xff, 0x66)
-			: color::ForegroundBrightMagenta) << std::format("{:<20} ", timing.solution.size() <= 20 ? timing.solution : "FULL OUTPUT ABOVE");
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode;
+		std::cout << colorBorder << vt::DrawingMode << "x " << vt::ASCIIMode << colorDay
+				  << std::vformat("{:<" + std::to_string(labelDay.size()) + "}", std::make_format_args(timing.puzzleId)) << colorBorder
+				  << vt::DrawingMode << " x " << vt::ASCIIMode << (timing.part == 'A' ? colorPartA : colorPartB)
+				  << std::vformat("{:<" + std::to_string(labelPart.size()) + "}", std::make_format_args(timing.part)) << colorBorder
+				  << vt::DrawingMode << " x " << vt::ASCIIMode << colorInputFile
+				  << std::vformat("{:<" + std::to_string(longestInputFileLength) + "}", std::make_format_args(timing.inputFile))
+				  << colorBorder << vt::DrawingMode << " x " << vt::ASCIIMode
+				  << (timing.solution.size() <= maxSolutionLength ? colorSolution : colorSolutionTooLong)
+				  << std::vformat(
+						 "{:<" + std::to_string(longestSolutionLength) + "}",
+						 std::make_format_args(timing.solution.size() <= maxSolutionLength ? timing.solution : maxSolutionIndicator))
+				  << colorBorder << vt::DrawingMode << " x " << vt::ASCIIMode;
+
 		auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(timing.durationUs);
+		std::string durationStr;
+		std::string durationColor;
 		if (timing.durationUs < 1000us)
 		{
-			std::cout << color::ForegroundBrightGreen << std::format("{:<9}", std::format("{} µs", timing.durationUs.count()));
+			durationStr = std::format("{} µs", timing.durationUs.count());
+			durationColor = colorDurationFast;
 		}
 		else if (durationMs < 10ms)
 		{
-			std::cout << color::ForegroundBrightYellow
-					  << std::format("{:<9}", std::format("{}.{} ms", durationMs.count(), timing.durationUs.count() % 1000 / 10));
+			durationStr = std::format("{}.{} ms", durationMs.count(), timing.durationUs.count() % 1000 / 10);
+			durationColor = colorDurationMedium;
 		}
 		else if (durationMs < 1000ms)
 		{
-			std::cout << color::ForegroundBrightYellow << std::format("{:<9}", std::format("{} ms", durationMs.count()));
+			durationStr = std::format("{} ms", durationMs.count());
+			durationColor = colorDurationMedium;
 		}
 		else
 		{
 			auto durationSec = std::chrono::duration_cast<std::chrono::seconds>(timing.durationUs);
-			std::cout << color::ForegroundBrightRed
-					  << std::format("{:<9}", std::format("{}.{} s", durationSec.count(), durationMs.count() % 1000 / 10));
+			durationStr = std::format("{}.{} s", durationSec.count(), durationMs.count() % 1000 / 10);
+			durationColor = colorDurationSlow;
 		}
-		std::cout << color::ForegroundWhite << vt::DrawingMode << "x" << vt::ASCIIMode << '\n';
+		std::cout << durationColor << std::vformat("{:<" + std::to_string(labelDuration.size()) + "}", std::make_format_args(durationStr));
+		std::cout << colorBorder << vt::DrawingMode << " x" << vt::ASCIIMode << '\n';
 	}
-	std::cout << vt::DrawingMode << "mqqqqqvqqqqqqvqqqqqqqqqqqqqqqqqqqqqqqvqqqqqqqqqqqqqqqqqqqqqqvqqqqqqqqqqj";
+
+	// Print bottom line of the table
+	std::cout << vt::DrawingMode << "m" << std::string(labelDay.size() + 2, 'q') << "v" << std::string(labelPart.size() + 2, 'q') << "v"
+			  << std::string(longestInputFileLength + 2, 'q') << "v" << std::string(longestSolutionLength + 2, 'q') << "v"
+			  << std::string(labelDuration.size() + 2, 'q') << "j";
 	std::cout << vt::ASCIIMode << '\n';
 }
