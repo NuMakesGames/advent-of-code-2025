@@ -302,17 +302,20 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	auto totalDurationUs = 0us;
-	for (const auto& timing : puzzleTimings)
+	if (!puzzleTimings.empty())
 	{
-		totalDurationUs += timing.durationUs;
+		auto totalDurationUs = 0us;
+		for (const auto& timing : puzzleTimings)
+		{
+			totalDurationUs += timing.durationUs;
+		}
+
+		std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
+		std::cout << color::ForegroundBrightBlue << std::chrono::duration_cast<std::chrono::milliseconds>(totalDurationUs).count() << " ms";
+		std::cout << color::ForegroundBrightWhite << ".\n";
+
+		PrintPuzzleDetailsTable(puzzleTimings);
 	}
-
-	std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
-	std::cout << color::ForegroundBrightBlue << std::chrono::duration_cast<std::chrono::milliseconds>(totalDurationUs).count() << " ms";
-	std::cout << color::ForegroundBrightWhite << ".\n";
-
-	PrintPuzzleDetailsTable(puzzleTimings);
 
 	::timeEndPeriod(1); // Restore default timer resolution.
 	nu::console::RestoreConsoleState(consoleState, false /*shouldRestorePosition*/);
@@ -339,7 +342,6 @@ void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 				  << std::format("{:>2}  ", timing.puzzleId);
 		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode
 				  << (timing.part == 'A' ? color::ForegroundBrightGreen : color::ForegroundBrightRed) << " " << timing.part << "   ";
-
 		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << color::ForegroundBrightBlue
 				  << std::format("{:<21} ", timing.inputFile);
 		std::cout << color::ForegroundWhite << vt::DrawingMode << "x " << vt::ASCIIMode << (timing.solution.size() <= 20
