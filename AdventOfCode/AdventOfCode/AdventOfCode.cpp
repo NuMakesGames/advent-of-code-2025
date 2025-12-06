@@ -355,7 +355,7 @@ void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 	constexpr auto colorInputFile = color::ForegroundBrightBlue;
 	const auto colorSolution = color::ForegroundRGB(0xff, 0xff, 0x66);
 	constexpr auto colorSolutionTooLong = color::ForegroundBrightMagenta;
-	constexpr auto colorDurationFast = color::ForegroundBrightGreen;
+	const auto colorDurationFast = color::ForegroundRGB(0x99, 0xff, 0x99);
 	constexpr auto colorDurationMedium = color::ForegroundBrightYellow;
 	constexpr auto colorDurationSlow = color::ForegroundBrightRed;
 
