@@ -54,11 +54,13 @@ namespace Puzzle08B
 	{
 		auto junctionBoxes = std::vector<Vector3d<int>>{};
 		auto circuits = std::vector<Circuit>{};
+		auto circuitLookup = std::unordered_map<Vector3d<int>, size_t>{};
 		for (const auto& line : inputLines)
 		{
 			auto coords = Utilities::ExtractInt32s(line);
 			auto junctionBox = Vector3d<int>{ coords[0], coords[1], coords[2] };
 			junctionBoxes.emplace_back(junctionBox);
+			circuitLookup[junctionBox] = circuits.size();
 			circuits.emplace_back(std::unordered_set<Vector3d<int>>{ junctionBox });
 		}
 
@@ -82,14 +84,20 @@ namespace Puzzle08B
 		auto result = 0ull;
 		for (const auto& connection : sortedJunctionBoxPairs)
 		{
-			auto& leftCircuit =
-				*std::ranges::find_if(circuits, [&connection](const auto& circuit) { return circuit.Contains(connection.left); });
-			auto& rightCircuit =
-				*std::ranges::find_if(circuits, [&connection](const auto& circuit) { return circuit.Contains(connection.right); });
-			leftCircuit.Connect(rightCircuit);
+			auto iLeft = circuitLookup[connection.left];
+			auto iRight = circuitLookup[connection.right];
+			if (iLeft == iRight)
+			{
+				continue;
+			}
 
-			std::erase_if(circuits, [](const Circuit& circuit) { return circuit.Size() == 0; });
-			if (circuits.size() == 1)
+			for (const auto& box : circuits[iRight].junctionBoxes)
+			{
+				circuitLookup[box] = iLeft;
+			}
+			circuits[iLeft].Connect(circuits[iRight]);
+
+			if (circuits[iLeft].Size() == junctionBoxes.size())
 			{
 				result = static_cast<uint64_t>(connection.left.x) * connection.right.x;
 				break;

@@ -54,11 +54,13 @@ namespace Puzzle08A
 	{
 		auto junctionBoxes = std::vector<Vector3d<int>>{};
 		auto circuits = std::vector<Circuit>{};
+		auto circuitLookup = std::unordered_map<Vector3d<int>, size_t>{};
 		for (const auto& line : inputLines)
 		{
 			auto coords = Utilities::ExtractInt32s(line);
 			auto junctionBox = Vector3d<int>{ coords[0], coords[1], coords[2] };
 			junctionBoxes.emplace_back(junctionBox);
+			circuitLookup[junctionBox] = circuits.size();
 			circuits.emplace_back(std::unordered_set<Vector3d<int>>{ junctionBox });
 		}
 
@@ -82,13 +84,20 @@ namespace Puzzle08A
 		const int steps = junctionBoxes.size() == 20 ? 10 : 1000; // Sample only has 20 lines
 		for (int k = 0; k < steps; ++k)
 		{
-			auto& connection = sortedJunctionBoxPairs[k];
+			const auto& connection = sortedJunctionBoxPairs[k];
+			auto iLeft = circuitLookup[connection.left];
+			auto iRight = circuitLookup[connection.right];
+			if (iLeft == iRight)
+			{
+				continue;
+			}
 
-			auto& leftCircuit = *std::ranges::find_if(
-				circuits, [&connection](const auto& circuit) { return circuit.Contains(connection.left); });
-			auto& rightCircuit = *std::ranges::find_if(
-				circuits, [&connection](const auto& circuit) { return circuit.Contains(connection.right); });
-			leftCircuit.Connect(rightCircuit);
+			for (const auto& box : circuits[iRight].junctionBoxes)
+			{
+				circuitLookup[box] = iLeft;
+			}
+
+			circuits[iLeft].Connect(circuits[iRight]);
 		}
 
 		std::ranges::sort(
