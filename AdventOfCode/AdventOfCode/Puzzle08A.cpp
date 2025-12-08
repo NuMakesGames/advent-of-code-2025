@@ -50,6 +50,7 @@ namespace Puzzle08A
 		auto operator<=>(const Connection&) const = default;
 	};
 
+	// 103488
 	std::string Solve(const std::vector<std::string>& inputLines)
 	{
 		auto junctionBoxes = std::vector<Vector3d<int>>{};
