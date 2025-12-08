@@ -78,13 +78,17 @@ namespace Puzzle08B
 				uint64_t dz = left.z - right.z;
 				uint64_t distSquared = dx * dx + dy * dy + dz * dz;
 				sortedJunctionBoxPairs.emplace_back(distSquared, left, right);
+				std::ranges::push_heap(sortedJunctionBoxPairs, std::greater<Connection>{});
 			}
 		}
-		std::ranges::sort(sortedJunctionBoxPairs);
 
 		auto result = 0ull;
-		for (const auto& connection : sortedJunctionBoxPairs)
+		while (!sortedJunctionBoxPairs.empty())
 		{
+			std::ranges::pop_heap(sortedJunctionBoxPairs, std::greater<Connection>{});
+			const auto& connection = sortedJunctionBoxPairs.back();
+			sortedJunctionBoxPairs.pop_back();
+
 			auto iLeft = circuitLookup[connection.left];
 			auto iRight = circuitLookup[connection.right];
 			if (iLeft == iRight)
