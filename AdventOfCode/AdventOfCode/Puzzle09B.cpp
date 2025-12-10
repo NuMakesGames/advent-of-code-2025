@@ -10,6 +10,26 @@ using namespace nu::console::vt;
 
 namespace Puzzle09B
 {
+	struct Line
+	{
+		Vector2d<int> start;
+		Vector2d<int> end;
+
+		// Returns true if the line segments intersect
+		bool Intersects(const Line& other) const
+		{
+			return Counterclockwise(start, other.start, other.end) != Counterclockwise(end, other.start, other.end)
+			    && Counterclockwise(start, end, other.start) != Counterclockwise(start, end, other.end);
+		}
+
+		// Returns whether three points wind counterclockwise
+		static bool Counterclockwise(const Vector2d<int>& a, const Vector2d<int>& b, const Vector2d<int>& c)
+		{
+			return static_cast<int64_t>(c.y - a.y) * static_cast<int64_t>(b.x - a.x)
+			     > static_cast<int64_t>(b.y - a.y) * static_cast<int64_t>(c.x - a.x);
+		}
+	};
+
 	// 1461987144
 	std::string Solve(const std::vector<std::string>& inputLines)
 	{
@@ -20,31 +40,13 @@ namespace Puzzle09B
 			points.emplace_back(coords[0], coords[1]);
 		}
 
-		// Build perimeter...
-		std::unordered_set<Vector2d<int>> perimeter;
+		// Build perimeter
+		auto perimeter = std::vector<Line>{};
 		for (auto i = 0; i < points.size(); ++i)
 		{
 			const auto& first = points[i];
 			const auto& second = points[i == points.size() - 1 ? 0 : i + 1];
-
-			if (first.x == second.x)
-			{
-				auto start = std::min(first.y, second.y);
-				auto end = std::max(first.y, second.y);
-				for (auto y = start; y <= end; ++y)
-				{
-					perimeter.insert(Vector2d<int>{ first.x, y });
-				}
-			}
-			else
-			{
-				auto start = std::min(first.x, second.x);
-				auto end = std::max(first.x, second.x);
-				for (auto x = start; x <= end; ++x)
-				{
-					perimeter.insert(Vector2d<int>{ x, first.y });
-				}
-			}
+			perimeter.emplace_back(first, second);
 		}
 
 		// Compute all rectangles
@@ -61,7 +63,7 @@ namespace Puzzle09B
 		}
 		std::ranges::sort(allRectangles, std::greater<std::tuple<uint64_t, Vector2d<int>, Vector2d<int>>>{});
 
-		// Find largest valid rectangle by tracing interior
+		// Find largest valid rectangle by checking for intersections on internal perimeter of the rectangle
 		auto maxArea = 0ll;
 		auto maxPoints = std::pair<Vector2d<int>, Vector2d<int>>{};
 		for (const auto& [area, firstPoint, secondPoint] : allRectangles)
@@ -71,26 +73,29 @@ namespace Puzzle09B
 			auto minY = std::min(firstPoint.y, secondPoint.y) + 1;
 			auto maxY = std::max(firstPoint.y, secondPoint.y) - 1;
 
+			// Create a rectangle inside the current rectangle
+			auto innerPerimeter = std::array<Line, 4>{
+				Line{ Vector2d<int>{ minX, minY }, Vector2d<int>{ maxX, minY } },
+				Line{ Vector2d<int>{ minX, maxY }, Vector2d<int>{ maxX, maxY } },
+				Line{ Vector2d<int>{ minX, minY }, Vector2d<int>{ minX, maxY } },
+				Line{ Vector2d<int>{ maxX, minY }, Vector2d<int>{ maxX, maxY } },
+			};
+
+			// Test for intersetions using CCW test (https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/)
 			auto isValid = true;
-			for (auto x = minX; x <= maxX; ++x)
+			for (const auto& innerLine : innerPerimeter)
 			{
-				if (perimeter.contains(Vector2d<int>{ x, minY }) || perimeter.contains(Vector2d<int>{ x, maxY }))
+				for (const auto& outerLine : perimeter)
 				{
-					isValid = false;
-					break;
+					if (innerLine.Intersects(outerLine))
+					{
+						isValid = false;
+						break;
+					}
 				}
-			}
 
-			if (!isValid)
-			{
-				continue;
-			}
-
-			for (auto y = minY; y <= maxY; ++y)
-			{
-				if (perimeter.contains(Vector2d<int>{ minX, y }) || perimeter.contains(Vector2d<int>{ maxX, y }))
+				if (!isValid)
 				{
-					isValid = false;
 					break;
 				}
 			}
