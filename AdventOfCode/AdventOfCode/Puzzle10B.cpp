@@ -2,6 +2,7 @@
 
 #include "../Utilities/Utilities.h"
 #include "PuzzleSolvers.h"
+#include "z3++.h"
 
 using namespace Utilities;
 using namespace nu::asserts;
@@ -10,97 +11,68 @@ using namespace nu::console::vt;
 
 namespace Puzzle10B
 {
-	struct State
+	uint64_t SolveMachine(const std::vector<int>& desiredJoltageLevels, const std::vector<std::vector<int>>& buttons)
 	{
-		std::array<int, 10> joltageLevels;
-		size_t nextButton = 0;
+		// Setup Z3 optimizer
+		auto context = z3::context{};
+		auto optimizer = z3::optimize{ context };
 
-		auto operator<=>(const State&) const = default;
-	};
-} // namespace Puzzle10B
-
-IMPLEMENT_STD_HASH(
-	Puzzle10B::State,
-	value.joltageLevels[0],
-	value.joltageLevels[1],
-	value.joltageLevels[2],
-	value.joltageLevels[3],
-	value.joltageLevels[4],
-	value.joltageLevels[5],
-	value.joltageLevels[6],
-	value.joltageLevels[7],
-	value.joltageLevels[8],
-	value.joltageLevels[9],
-	value.nextButton);
-
-namespace Puzzle10B
-{
-	uint64_t SolveMachine(const std::array<int, 10>& desiredJoltageLevels, const std::vector<std::vector<int>>& buttons)
-	{
-		 auto queue = std::queue<State>{};
-		 auto seen = std::unordered_map<State, uint64_t>{};
-		 for (auto i = 0; i < buttons.size(); ++i)
+		// Create integer variables a, b, c, ... (one per button), each >= 0
+		auto buttonPresses = std::vector<z3::expr>{};
+		for (auto i = 0; i < buttons.size(); ++i)
 		{
-			auto nextState = State{};
-			nextState.nextButton = i;
-			seen[nextState] = 0;
-			queue.push(std::move(nextState));
-		 }
+			auto buttonPress = context.int_const(std::string{ static_cast<char>('a' + i) }.c_str());
+			buttonPresses.emplace_back(buttonPress);
 
-		 auto currentState = State{};
-		 auto presses = 0ull;
-		 while (currentState.joltageLevels != desiredJoltageLevels)
-		{
-			auto previousState = queue.front();
-			queue.pop();
-
-			currentState = previousState;
-			for (auto i : buttons[currentState.nextButton])
-			{
-				currentState.joltageLevels[i]++;
-			}
-			presses = seen[previousState] + 1;
-
-			for (auto i = 0; i < buttons.size(); ++i)
-			{
-				auto nextState = currentState;
-				nextState.nextButton = i;
-				if (seen.contains(nextState))
-				{
-					continue;
-				}
-
-				bool impossible = false;
-				for (auto k = 0; k < desiredJoltageLevels.size(); ++k)
-				{
-					if (currentState.joltageLevels[k] > desiredJoltageLevels[k])
-					{
-						impossible = true;
-						break;
-					}
-				}
-
-				if (impossible)
-				{
-					continue;
-				}
-
-				seen[nextState] = presses;
-				queue.push(std::move(nextState));
-			}
+			// Constraint: Button presses cannot be negative
+			optimizer.add(buttonPress >= 0);
 		}
 
-		return presses;
+		// Find buttons that contribute to each desired joltage level
+		for (auto i = 0; i < desiredJoltageLevels.size(); ++i)
+		{
+			auto pressedButtons = std::vector<z3::expr>{};
+			for (auto j = 0; j < buttons.size(); ++j)
+			{
+				const auto& button = buttons[j];
+				if (std::ranges::find(button, i) != button.end())
+				{
+					pressedButtons.push_back(buttonPresses[j]);
+				}
+			}
+
+			auto sum = context.int_val(0);
+			for (const auto& pressedButton : pressedButtons)
+			{
+				sum = sum + pressedButton;
+			}
+
+			// Constraint: Combined button presses must equal desired joltage level
+			optimizer.add(context.int_val(desiredJoltageLevels[i]) == sum);
+		}
+
+		// Minimize total button presses
+		auto totalPresses = context.int_val(0);
+		for (const auto& buttonPress : buttonPresses)
+		{
+			totalPresses = totalPresses + buttonPress;
+		}
+		optimizer.minimize(totalPresses);
+		VerifyElseCrash(optimizer.check() == z3::sat);
+
+		// Count button presses in solution
+		auto result = 0ull;
+		auto model = optimizer.get_model();
+		for (const auto& buttonPress : buttonPresses)
+		{
+			result += model.eval(buttonPress, true).get_numeral_int64();
+		}
+		return result;
 	}
 
-	// Does not terminate on full input. Did not optimize. Solved with Python Z3.
+	// 15883
 	std::string Solve(const std::vector<std::string>& inputLines)
 	{
-		if (inputLines.size() > 3)
-		{
-			return "Solved in Python with z3. :( :( :(";
-		}
-
 		auto totalPresses = 0ull;
 		for (const auto& line : inputLines)
 		{
@@ -124,17 +96,8 @@ namespace Puzzle10B
 				i = j + 2;
 			}
 
-			auto desiredJoltageLevels = std::array<int, 10>{};
-			auto counters = ExtractInt32s(std::string_view(line.data() + i, line.size() - i));
-			auto k = 0ull;
-			for (auto counter : counters)
-			{
-				desiredJoltageLevels[k++] = counter;
-			}
-
-			auto presses = SolveMachine(desiredJoltageLevels, buttons);
-			std::cout << presses << '\t' << line << '\n';
-			totalPresses += presses;
+			auto desiredJoltageLevels = ExtractInt32s(std::string_view(line.data() + i, line.size() - i));
+			totalPresses += SolveMachine(desiredJoltageLevels, buttons);
 		}
 
 		return std::to_string(totalPresses);
