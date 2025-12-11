@@ -10,41 +10,29 @@ using namespace nu::console::vt;
 
 namespace Puzzle11B
 {
-	using Path = std::vector<std::string>;
-	using Paths = std::vector<Path>;
 	using Graph = std::unordered_map<std::string, std::vector<std::string>>;
-	using Memo = std::unordered_map<std::string, Paths>;
+	using Memo = std::unordered_map<std::string, uint64_t>;
 
-	Paths DepthFirstSearchAllPaths(const std::string& current, const std::string& target, const Graph& graph, std::unordered_map<std::string, Paths>& memo)
+	uint64_t CountPaths(const std::string& current, const std::string& target, const Graph& graph, Memo& memo)
 	{
 		if (memo.contains(current))
 		{
 			return memo[current];
 		}
 
-		auto result = Paths{};
 		if (current == target)
 		{
-			auto path = Path{};
-			path.push_back(target);
-			result.push_back(path);
-			memo[current] = result;
-			return result;
+			memo[current] = 1;
+			return memo[current];
 		}
 
+		auto result = 0ull;
 		auto itNext = graph.find(current);
 		if (itNext != graph.end())
 		{
 			for (const auto& next : itNext->second)
 			{
-				auto paths = DepthFirstSearchAllPaths(next, target, graph, memo);
-				for (const auto& path : paths)
-				{
-					auto newPath = Path{};
-					newPath.push_back(current);
-					newPath.insert_range(newPath.end(), path);
-					result.push_back(newPath);
-				}
+				result += CountPaths(next, target, graph, memo);
 			}
 		}
 
@@ -52,8 +40,7 @@ namespace Puzzle11B
 		return result;
 	}
 
-
-	// 114672848 too low
+	// 429399933071120
 	std::string Solve(const std::vector<std::string>& inputLines)
 	{
 		auto nodes = std::unordered_set<std::string>{};
@@ -69,17 +56,16 @@ namespace Puzzle11B
 
 		// Wrote out graphviz and visualized to confirm DAG
 		auto svrToFftMemo = Memo{};
-		auto svrToFftPaths = DepthFirstSearchAllPaths("svr", "fft", graph, svrToFftMemo);
+		auto svrToFftPaths = CountPaths("svr", "fft", graph, svrToFftMemo);
 
 		auto fftToDacMemo = Memo{};
-		auto fftToDacPaths = DepthFirstSearchAllPaths("fft", "dac", graph, fftToDacMemo);
+		auto fftToDacPaths = CountPaths("fft", "dac", graph, fftToDacMemo);
 
 		auto dacToOutMemo = Memo{};
-		auto dacToOutPaths = DepthFirstSearchAllPaths("dac", "out", graph, dacToOutMemo);
+		auto dacToOutPaths = CountPaths("dac", "out", graph, dacToOutMemo);
 
-		return std::to_string(svrToFftPaths.size() * fftToDacPaths.size() * dacToOutPaths.size());
+		return std::to_string(svrToFftPaths * fftToDacPaths * dacToOutPaths);
 	}
-
 
 	std::string Visualize(const std::vector<std::string>& inputLines)
 	{
