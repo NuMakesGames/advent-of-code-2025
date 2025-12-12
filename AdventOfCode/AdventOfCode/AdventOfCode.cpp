@@ -310,11 +310,10 @@ int main(int argc, char* argv[])
 			totalDurationUs += timing.durationUs;
 		}
 
+		PrintPuzzleDetailsTable(puzzleTimings);
 		std::cout << color::ForegroundBrightWhite << "\nAll solvers executed in ";
 		std::cout << color::ForegroundBrightBlue << std::chrono::duration_cast<std::chrono::milliseconds>(totalDurationUs).count() << " ms";
 		std::cout << color::ForegroundBrightWhite << ".\n";
-
-		PrintPuzzleDetailsTable(puzzleTimings);
 	}
 
 	::timeEndPeriod(1); // Restore default timer resolution.

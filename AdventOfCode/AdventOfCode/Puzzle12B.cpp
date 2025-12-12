@@ -12,7 +12,7 @@ namespace Puzzle12B
 {
 	std::string Solve(const std::vector<std::string>& inputLines)
 	{
-		return "Puzzle12B not yet solved!";
+		return "Merry Christmas!";
 	}
 
 	std::string Visualize(const std::vector<std::string>& inputLines)
