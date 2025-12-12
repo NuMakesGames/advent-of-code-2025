@@ -357,7 +357,8 @@ void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 	constexpr auto colorSolutionTooLong = color::ForegroundBrightMagenta;
 	const auto colorDurationFast = color::ForegroundRGB(0x99, 0xff, 0x99);
 	constexpr auto colorDurationMedium = color::ForegroundBrightYellow;
-	constexpr auto colorDurationSlow = color::ForegroundBrightRed;
+	const auto colorDurationSlow = color::ForegroundRGB(0xff, 0x66, 0x00);
+	constexpr auto colorDurationVerySlow = color::ForegroundBrightRed;
 
 	// Print top line of the table
 	std::cout << "\n" << colorBorder;
@@ -413,13 +414,13 @@ void PrintPuzzleDetailsTable(std::vector<PuzzleDetails>& puzzleTimings)
 		else if (durationMs < 1000ms)
 		{
 			durationStr = std::format("{} ms", durationMs.count());
-			durationColor = colorDurationMedium;
+			durationColor = durationMs < 100ms ? colorDurationMedium : colorDurationSlow;
 		}
 		else
 		{
 			auto durationSec = std::chrono::duration_cast<std::chrono::seconds>(timing.durationUs);
 			durationStr = std::format("{}.{} s", durationSec.count(), durationMs.count() % 1000 / 10);
-			durationColor = colorDurationSlow;
+			durationColor = colorDurationVerySlow;
 		}
 		std::cout << durationColor << std::vformat("{:<" + std::to_string(labelDuration.size()) + "}", std::make_format_args(durationStr));
 		std::cout << colorBorder << vt::DrawingMode << " x" << vt::ASCIIMode << '\n';
