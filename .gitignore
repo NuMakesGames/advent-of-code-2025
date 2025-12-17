@@ -405,6 +405,9 @@ FodyWeavers.xsd
 !ext/boost_1_83_0/include/boost/predef/hardware/simd/arm/
 ext/boost_1_83_0/lib/
 
+# Include z3 libs
+!ext/z3-4.15.4/bin/
+
 # Exclude vcpkg (manifest mode)
 vcpkg_installed/
 vcpkg-exports/
